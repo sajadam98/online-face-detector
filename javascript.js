@@ -1,5 +1,10 @@
 $(".text-center").hide();
 var formdata = new FormData();
+// $("#btn_detect").disabled = true;
+
+// $("#img_url").change(function(){
+//   $("#btn_detect").disabled = false;
+// });
 
 function readURL(input) {
   if (input.files && input.files[0]) {
@@ -8,8 +13,16 @@ function readURL(input) {
     reader.onload = function(e) {
       $("#img_user").attr("src", e.target.result);
       $(".text-center").hide();
+    };
 
-      $.ajax({
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+$("#btn_detect").click(function(){
+  
+  $(".text-center").show();
+  $.ajax({
         type: "POST",
         url: "https://api-us.faceplusplus.com/facepp/v3/detect",
         cache: false,
@@ -17,30 +30,48 @@ function readURL(input) {
         processData: false,
         data: formdata,
         success: function(result) {
-            console.log(result);
-            
+          var max = 0.0;
+          var emotion = "";
+          if(result.faces[0].attributes.emotion.anger > max){
+            max = result.faces[0].attributes.emotion.anger;
+            emotion = "angry";
+          }
+          if(result.faces[0].attributes.emotion.disgust > max){
+            max = result.faces[0].attributes.emotion.disgust;
+            emotion = "disgust";
+          }
+          if(result.faces[0].attributes.emotion.fear > max){
+            max = result.faces[0].attributes.emotion.fear;
+            emotion = "fear";
+          }
+          if(result.faces[0].attributes.emotion.happiness > max){
+            max = result.faces[0].attributes.emotion.happiness;
+            emotion = "happy";
+          }
+          if(result.faces[0].attributes.emotion.neutral > max){
+            max = result.faces[0].attributes.emotion.neutral;
+            emotion = "neutral";
+          }
+          if(result.faces[0].attributes.emotion.sadness > max){
+            max = result.faces[0].attributes.emotion.sadness;
+            emotion = "sad";
+          }
+          if(result.faces[0].attributes.emotion.surprise > max){
+            max = result.faces[0].attributes.emotion.surprise;
+            emotion = "surprise";
+          }
           $("#txt_age").text(result.faces[0].attributes.age.value);
           $("#txt_gender").text(result.faces[0].attributes.gender.value);
-          $("#txt_anger").text(result.faces[0].attributes.emotion.anger);
-          $("#txt_disgust").text(result.faces[0].attributes.emotion.disgust);
-          $("#txt_fear").text(result.faces[0].attributes.emotion.fear);
-          $("#txt_happiness").text(result.faces[0].attributes.emotion.happiness);
-          $("#txt_neutral").text(result.faces[0].attributes.emotion.neutral);
-          $("#txt_sadness").text(result.faces[0].attributes.emotion.sadness);
-          $("#txt_surprise").text(result.faces[0].attributes.emotion.surprise);
+          $("#txt_emotion").text(emotion);
           $(".text-center").hide();
         }
       });
-    };
-
-    reader.readAsDataURL(input.files[0]);
-  }
-}
+});
 
 $("#img_url").change(function() {
   $(".text-center").show();
   if ($(this).prop("files").length > 0) {
-    file = $(this).prop("files")[0];
+    file = $("#img_url").prop("files")[0];
     formdata.append("image_file", file);
     formdata.append("api_key" , "5xRe8eehziNXwF8MAY4ZYO7vm5fx4XWL");
     formdata.append("api_secret" , "yN1E1dDm2sRl-Sud-Ywe14dgiT0jThaN");
